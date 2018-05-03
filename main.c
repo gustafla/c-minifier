@@ -3,6 +3,34 @@
 #include <string.h>
 #include "stb_c_lexer.h"
 
+struct str_pair {
+    char *key;
+    char *val;
+};
+
+struct str_hashmap {
+    size_t capacity;
+    size_t len;
+    struct str_pair *pairs;
+};
+
+struct str_hashmap str_hashmap_init(size_t capacity) {
+    struct str_hashmap m;
+    m.pairs = (struct str_pair*)malloc(sizeof(struct str_pair) * capacity);
+    m.capacity = capacity;
+    m.len = 0;
+    return m;
+}
+
+unsigned long str_hash(unsigned char *str){
+    unsigned long hash = 13;
+    int c;
+    while (c = *str++) {
+        hash = ((hash << 5) + hash) + c;
+    }
+    return hash;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         return EXIT_FAILURE;

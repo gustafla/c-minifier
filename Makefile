@@ -7,7 +7,7 @@ OBJS=$(patsubst %.c, %.o, $(SOURCES))
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-%.o:
+%.o: %.c
 	$(CC) $(CFLAGS) -c $<
 
 .PHONY: clean
