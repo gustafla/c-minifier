@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "stb_c_lexer.h"
 
 int main(int argc, char *argv[]) {
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
             int len = strlen(lex.string);
             char *test = (char*)malloc(len+1);
             strncpy(test, lex.parse_point-len, len);
-            test[len] = NULL;
+            test[len] = '\0';
             printf("%s\n", test);
             free(test);
         }
