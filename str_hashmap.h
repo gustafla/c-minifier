@@ -22,4 +22,8 @@ struct str_hashmap {
     struct str_pair_list *lists;
 };
 
+struct str_hashmap str_hashmap_init(size_t capacity);
+char *str_hashmap_get(struct str_hashmap *map, char *key);
+void str_hashmap_put(struct str_hashmap *map, char *key, char *value);
+
 #endif // STR_HASHMAP_H

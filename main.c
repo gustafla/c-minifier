@@ -38,5 +38,15 @@ int main(int argc, char *argv[]) {
 
     free(src);
     free(tmp);
+
+    struct str_hashmap testmap = str_hashmap_init(16);
+    printf("%p\n", str_hashmap_get(&testmap, "asdfdsf:"));
+    str_hashmap_put(&testmap, "asdfdsf:", "Petteri Punakuono asqwerrtdfghhjjkklxcvbkjkjkjkjkjkjkjkjasdc  x");
+    printf("%p\n", str_hashmap_get(&testmap, "asdfdsf:"));
+    printf("%s\n", str_hashmap_get(&testmap, "asdfdsf:"));
+    str_hashmap_put(&testmap, "asdfdsf:", "Petturi Urpo");
+    printf("%p\n", str_hashmap_get(&testmap, "asdfdsf:"));
+    printf("%s\n", str_hashmap_get(&testmap, "asdfdsf:"));
+
     return EXIT_SUCCESS;
 }
