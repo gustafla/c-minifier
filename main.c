@@ -4,24 +4,39 @@
 #include "stb_c_lexer.h"
 #include "str_hashmap.h"
 
+size_t read_file_to_str(char **dst, char const *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (!file) {
+        fprintf(stderr, "Cannot open file %s\n", filename);
+        return 0;
+    }
+
+    fseek(file, 0, SEEK_END);
+    size_t len = ftell(file);
+    *dst = (char*)malloc(len);
+    fseek(file, 0, SEEK_SET);
+
+    size_t read = fread(*dst, sizeof(char), len, file);
+    fclose(file);
+
+    if (read != len) {
+        fprintf(stderr, "Failed to read file %s\n", filename);
+        return 0;
+    }
+    return len;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         return EXIT_FAILURE;
     }
 
-    FILE *file = fopen(argv[1], "rb");
-    if (!file) {
+    char *src, *tmp;
+    size_t len = read_file_to_str(&src, argv[1]);
+    if (!len) {
         return EXIT_FAILURE;
     }
-
-    fseek(file, 0, SEEK_END);
-    size_t len = ftell(file);
-    char *src = (char*)malloc(len);
-    char *tmp = (char*)malloc(len);
-    fseek(file, 0, SEEK_SET);
-
-    fread(src, sizeof(char), len, file);
-    fclose(file);
+    tmp = (char*)malloc(len);
 
     stb_lexer lex;
     stb_c_lexer_init(&lex, src, src+len, tmp, len);
