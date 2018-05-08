@@ -5,6 +5,7 @@
 #include "str_hashmap.h"
 
 #define BLACKLIST_FILENAME ".minify_blacklist"
+#define PRINTABLES "abcdefghijklmnopqrstuvwxyz"
 
 size_t read_file_to_str(char **dst, char const *filename) {
     FILE *file = fopen(filename, "rb");
@@ -47,25 +48,41 @@ struct str_hashmap load_blacklist() {
     return map;
 }
 
-/*void gen_alias(char* id, size_t len) {
-    static struct str_hashmap ids = str_hashmap_init(2048);
+void gen_alias(char* id, size_t len) {
+    static struct str_hashmap ids = {0};
     static unsigned long current = 0;
-    static const char *PRINTABLES = "abcdefghijklmnopqrstuvwxyz";
-
-    char *known = str_hashmap_get(&ids, id);
-    size_t gen_len;
-    if (known) {
-        strncpy(id, known, len);
-        gen_len = strlen(known);
-    } else {
-        
+    if (!ids.capacity) {
+        ids = str_hashmap_init(2048);
     }
+
+    printf("current: %lu\n", current);
+
+    char *gen_id = str_hashmap_get(&ids, id);
+    size_t gen_len;
+    /*if (gen_id) {
+        gen_len = strlen(gen_id);
+        strncpy(id, gen_id, gen_len);
+    } else */{
+        size_t printables_len = (sizeof(PRINTABLES) - 1);
+        gen_len = current / printables_len + 1;
+        gen_id = (char*)malloc(gen_len);
+        for (size_t i=0; i<gen_len; i++) {
+            size_t idx = current / ((i+1) * printables_len);
+            gen_id[i] = PRINTABLES[ idx + (idx % printables_len)];
+        }
+        current++;
+        str_hashmap_put(&ids, id, gen_id);
+        strncpy(id, gen_id, gen_len);
+        free(gen_id);
+    }
+
+    printf("gen_len: %lu\n", gen_len);
 
     // fill rest of transformed id with whitespace
     for (size_t i = gen_len; i<len; i++) {
         id[i] = ' ';
     }
-}*/
+}
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -81,7 +98,7 @@ int main(int argc, char *argv[]) {
     }
     tmp = (char*)malloc(len);
 
-    stb_lexer lex;
+    /*stb_lexer lex;
     stb_c_lexer_init(&lex, src, src+len, tmp, len);
     while (stb_c_lexer_get_token(&lex)) {
         if (lex.token == CLEX_id) {
@@ -94,6 +111,13 @@ int main(int argc, char *argv[]) {
             }
             free(test);
         }
+    }*/
+
+    char buf[10];
+    buf[9] = '\0';
+    for (int i=0; i<200; i++) {
+        gen_alias(buf, 9);
+        printf("%s|\n", buf);
     }
 
     free(src);
