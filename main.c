@@ -38,17 +38,34 @@ struct str_hashmap load_blacklist() {
 
     struct str_hashmap map = str_hashmap_init(128);
 
-    // as long as "list" has data, iterate line by line
-    for (char *nl; *list; list=nl+1) {
-        nl = strchr(list, '\n'); // find end of line
-        *nl = '\0'; // replace with null for map put
-        if (*list != '#' && list != nl) { // ignore comments and empty lines
-            str_hashmap_put(&map, list, ""); // makes a copy
+    for (char *token = strtok(list, "\n"); token; token = strtok(NULL, "\n")) {
+        if (*token != '#' && *token != '\n') { // ignore comment or empty
+            str_hashmap_put(&map, token, "");
         }
     }
 
     return map;
 }
+
+/*void gen_alias(char* id, size_t len) {
+    static struct str_hashmap ids = str_hashmap_init(2048);
+    static unsigned long current = 0;
+    static const char *PRINTABLES = "abcdefghijklmnopqrstuvwxyz";
+
+    char *known = str_hashmap_get(&ids, id);
+    size_t gen_len;
+    if (known) {
+        strncpy(id, known, len);
+        gen_len = strlen(known);
+    } else {
+        
+    }
+
+    // fill rest of transformed id with whitespace
+    for (size_t i = gen_len; i<len; i++) {
+        id[i] = ' ';
+    }
+}*/
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
