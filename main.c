@@ -50,33 +50,31 @@ struct str_hashmap load_blacklist() {
 
 void gen_alias(char* id, size_t len) {
     static struct str_hashmap ids = {0};
-    static unsigned long current = 0;
-    if (!ids.capacity) {
+    static unsigned long current = 0; // current "number" (to become a base 26)
+    if (!ids.capacity) { // init known ids hashmap if not done yet
         ids = str_hashmap_init(2048);
     }
 
-    printf("current: %lu\n", current);
-
-    char *gen_id = str_hashmap_get(&ids, id);
-    size_t gen_len;
-    /*if (gen_id) {
+    char *gen_id = str_hashmap_get(&ids, id); // check if id is known
+    size_t gen_len; // len of string to be written to param "id"
+    if (gen_id) {
         gen_len = strlen(gen_id);
-        strncpy(id, gen_id, gen_len);
-    } else */{
-        size_t printables_len = (sizeof(PRINTABLES) - 1);
-        gen_len = current / printables_len + 1;
-        gen_id = (char*)malloc(gen_len);
-        for (size_t i=0; i<gen_len; i++) {
-            size_t idx = current / ((i+1) * printables_len);
-            gen_id[i] = PRINTABLES[ idx + (idx % printables_len)];
-        }
+        strncpy(id, gen_id, gen_len); // if id known, we can just write it out
+    } else { // else generate a new alias
+        char gen_id[32]; // TODO make this safer
+        /* Thank mr stackoverflow for helping a brainlet out */
+        gen_len = 0; // start from most significant
+        unsigned long n = current; // our number
+        do {
+            // insert the character this digit represents
+            gen_id[gen_len++] = PRINTABLES[n % (sizeof(PRINTABLES)-1)];
+            // move "magnitude" of n down to the next less significant digit
+        } while ((unsigned long)(n /= (sizeof(PRINTABLES)-1)) > 0);
+        // next number for next call
         current++;
-        str_hashmap_put(&ids, id, gen_id);
-        strncpy(id, gen_id, gen_len);
-        free(gen_id);
+        str_hashmap_put(&ids, id, gen_id); // save result of this id
+        strncpy(id, gen_id, gen_len); // write out
     }
-
-    printf("gen_len: %lu\n", gen_len);
 
     // fill rest of transformed id with whitespace
     for (size_t i = gen_len; i<len; i++) {
@@ -115,7 +113,10 @@ int main(int argc, char *argv[]) {
 
     char buf[10];
     buf[9] = '\0';
-    for (int i=0; i<200; i++) {
+    for (int i=0; i<30; i++) {
+        for (char *c=buf; *c; c++) {
+            *c = rand();
+        }
         gen_alias(buf, 9);
         printf("%s|\n", buf);
     }
