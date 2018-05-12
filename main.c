@@ -16,11 +16,13 @@ size_t read_file_to_str(char **dst, char const *filename) {
 
     fseek(file, 0, SEEK_END);
     size_t len = ftell(file);
-    *dst = (char*)malloc(len);
+    *dst = (char*)malloc(len+1);
     fseek(file, 0, SEEK_SET);
 
     size_t read = fread(*dst, sizeof(char), len, file);
     fclose(file);
+
+    (*dst)[len] = '\0';
 
     if (read != len) {
         free(*dst);
@@ -41,6 +43,7 @@ struct str_hashmap load_blacklist() {
 
     for (char *token = strtok(list, "\n"); token; token = strtok(NULL, "\n")) {
         if (*token != '#' && *token != '\n') { // ignore comment or empty
+            printf("%s", token);
             str_hashmap_put(&map, token, "");
         }
     }
@@ -53,6 +56,10 @@ void gen_alias(char* id, size_t len) {
     static unsigned long current = 0; // current "number" (to become a base 26)
     if (!ids.capacity) { // init known ids hashmap if not done yet
         ids = str_hashmap_init(2048);
+    }
+
+    if (len <= current/(sizeof(PRINTABLES)-1)+1) {
+        return; // don't process id when there is no advantage for doing so
     }
 
     char *gen_id = str_hashmap_get(&ids, id); // check if id is known
@@ -89,39 +96,44 @@ int main(int argc, char *argv[]) {
 
     struct str_hashmap blacklist_map = load_blacklist();
 
-    char *src, *tmp;
+    char *src, *new, *tmp;
     size_t len = read_file_to_str(&src, argv[1]);
     if (!len) {
         return EXIT_FAILURE;
     }
-    tmp = (char*)malloc(len);
+    tmp = (char*)malloc(len); // stb_lexer scratch space
+    new = (char*)malloc(len+1); // the one to be modified
+    strcpy(new, src);
+
 
     /*stb_lexer lex;
     stb_c_lexer_init(&lex, src, src+len, tmp, len);
+    char const *initpos = lex.parse_point; // we'll need this
     while (stb_c_lexer_get_token(&lex)) {
         if (lex.token == CLEX_id) {
             int len = strlen(lex.string);
-            char *test = (char*)malloc(len+1);
-            strncpy(test, lex.parse_point-len, len);
-            test[len] = '\0';
-            if (!str_hashmap_get(&blacklist_map, test)) {
-                printf("%s\n", test);
+            char *new_id = (char*)malloc(len+1);
+            strcpy(new_id, lex.string);
+            new_id[len] = '\0';
+            if (!str_hashmap_get(&blacklist_map, new_id)) {
+                gen_alias(new_id, len);
+                strncpy(new + (lex.parse_point-initpos-len), new_id, len);
             }
-            free(test);
+            free(new_id);
         }
     }*/
 
-    char buf[10];
-    buf[9] = '\0';
-    for (int i=0; i<30; i++) {
-        for (char *c=buf; *c; c++) {
-            *c = rand();
-        }
-        gen_alias(buf, 9);
-        printf("%s|\n", buf);
-    }
+    printf("%s", new);
+    
+    /*for (int i=0; i<20000000; i++) {
+        char tmp[20];
+        tmp[19] = '\0';
+        gen_alias(tmp, 20);
+        printf("%s.\n", tmp);
+    }*/
 
     free(src);
+    free(new);
     free(tmp);
 
     return EXIT_SUCCESS;

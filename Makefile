@@ -1,6 +1,6 @@
 TARGET=minify
-CC=gcc
-CFLAGS=-Os -g -DSTB_C_LEXER_IMPLEMENTATION
+CC?=gcc
+CFLAGS+=-Os -g -DSTB_C_LEXER_IMPLEMENTATION
 SOURCES=main.c str_hashmap.c
 OBJS=$(patsubst %.c, %.o, $(SOURCES))
 
