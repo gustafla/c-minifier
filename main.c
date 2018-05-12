@@ -102,28 +102,20 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     tmp = (char*)malloc(len); // stb_lexer scratch space
-    new = (char*)malloc(len+1); // the one to be modified
-    strcpy(new, src);
 
-
-    /*stb_lexer lex;
+    stb_lexer lex;
     stb_c_lexer_init(&lex, src, src+len, tmp, len);
-    char const *initpos = lex.parse_point; // we'll need this
     while (stb_c_lexer_get_token(&lex)) {
         if (lex.token == CLEX_id) {
             int len = strlen(lex.string);
-            char *new_id = (char*)malloc(len+1);
-            strcpy(new_id, lex.string);
-            new_id[len] = '\0';
-            if (!str_hashmap_get(&blacklist_map, new_id)) {
-                gen_alias(new_id, len);
-                strncpy(new + (lex.parse_point-initpos-len), new_id, len);
+            if (!str_hashmap_get(&blacklist_map, lex.string)) {
+                gen_alias(lex.string, len);
+                strncpy(lex.parse_point-len, lex.string, len);
             }
-            free(new_id);
         }
-    }*/
+    }
 
-    printf("%s", new);
+    printf("%s", src);
     
     /*for (int i=0; i<20000000; i++) {
         char tmp[20];
@@ -133,7 +125,6 @@ int main(int argc, char *argv[]) {
     }*/
 
     free(src);
-    free(new);
     free(tmp);
 
     return EXIT_SUCCESS;
