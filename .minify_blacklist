@@ -1,13 +1,69 @@
-# keywords and internal types
-return
-main
-
-# external/library
-
-# stdlib
-malloc
-EXIT_SUCCESS
-
 # local macros have to be blacklisted for now too
 PRINTABLES
 BLACKLIST_FILENAME
+
+# external/library
+str_hashmap
+str_hashmap_init
+str_hashmap_put
+str_hashmap_get
+stb_lexer
+stb_c_lexer_init
+stb_c_lexer_get_token
+CLEX_id
+token
+string
+parse_point
+capacity
+
+# keywords
+return
+main
+struct
+const
+typedef
+static
+extern
+sizeof
+if
+else
+for
+while
+switch
+case
+do
+
+# basic types
+void
+long
+short
+char
+int
+unsigned
+signed
+
+# stdlib
+FILE
+fopen
+fread
+fseek
+SEEK_SET
+SEEK_END
+ftell
+malloc
+free
+size_t
+EXIT_SUCCESS
+EXIT_FAILURE
+NULL
+printf
+fprintf
+stderr
+fclose
+strncpy
+strcpy
+strcmp
+strlen
+strtok
+memcpy
+memset
