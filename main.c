@@ -65,7 +65,6 @@ void gen_alias(char* id, size_t len) {
     size_t gen_len; // len of string to be written to param "id"
     if (gen_id) {
         gen_len = strlen(gen_id);
-        //strncpy(id, gen_id, gen_len); // if id known, we can just write it out
         strcpy(id, gen_id); // if id known, we can just write it out
     } else { // else generate a new alias
         char gen_id[32]; // TODO make this safer
