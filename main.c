@@ -116,13 +116,6 @@ int main(int argc, char *argv[]) {
     }
 
     printf("%s", src);
-    
-    /*for (int i=0; i<20000000; i++) {
-        char tmp[20];
-        tmp[19] = '\0';
-        gen_alias(tmp, 20);
-        printf("%s.\n", tmp);
-    }*/
 
     free(src);
     free(tmp);

@@ -1,6 +1,13 @@
+# keywords and internal types
 return
 main
+
+# external/library
+
+# stdlib
+malloc
 EXIT_SUCCESS
 
-# Comment test
-malloc
+# local macros have to be blacklisted for now too
+PRINTABLES
+BLACKLIST_FILENAME
