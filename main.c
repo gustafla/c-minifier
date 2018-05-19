@@ -43,7 +43,6 @@ struct str_hashmap load_blacklist() {
 
     for (char *token = strtok(list, "\n"); token; token = strtok(NULL, "\n")) {
         if (*token != '#' && *token != '\n') { // ignore comment or empty
-            printf("%s", token);
             str_hashmap_put(&map, token, "");
         }
     }
@@ -66,7 +65,8 @@ void gen_alias(char* id, size_t len) {
     size_t gen_len; // len of string to be written to param "id"
     if (gen_id) {
         gen_len = strlen(gen_id);
-        strncpy(id, gen_id, gen_len); // if id known, we can just write it out
+        //strncpy(id, gen_id, gen_len); // if id known, we can just write it out
+        strcpy(id, gen_id); // if id known, we can just write it out
     } else { // else generate a new alias
         char gen_id[32]; // TODO make this safer
         /* Thank mr stackoverflow for helping a brainlet out */
@@ -79,6 +79,7 @@ void gen_alias(char* id, size_t len) {
         } while ((unsigned long)(n /= (sizeof(PRINTABLES)-1)) > 0);
         // next number for next call
         current++;
+        gen_id[gen_len] = '\0'; // add null char for str_hashmap_put
         str_hashmap_put(&ids, id, gen_id); // save result of this id
         strncpy(id, gen_id, gen_len); // write out
     }
