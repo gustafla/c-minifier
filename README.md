@@ -1,6 +1,6 @@
 # C Minifier
 
-Usage: c\_minifier input.c > output.c
+Usage: minify input.c > output.c
 
 Use tools like sed to remove unnecessary whitespace and comments.
 
