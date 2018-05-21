@@ -57,10 +57,6 @@ void gen_alias(char* id, size_t len) {
         ids = str_hashmap_init(2048);
     }
 
-    if (len <= current/(sizeof(PRINTABLES)-1)+1) {
-        return; // don't process id when there is no advantage for doing so
-    }
-
     char *gen_id = str_hashmap_get(&ids, id); // check if id is known
     size_t gen_len; // len of string to be written to param "id"
     if (gen_id) {
