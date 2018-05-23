@@ -1,8 +1,10 @@
 # C Minifier
 
-Usage: minify input.c > output.c
+Usage: minify input.c [-h header.h] > output.c
 
 Use tools like sed to remove unnecessary whitespace and comments.
 
-For now, you need to have a file called .minify\_blacklist in your working
-directory that has all needed-as-is indentifiers listed line by line.
+To keep certain identifiers intact, you can list them line by line in a file
+called .minify\_blacklist in the working directory. You can also use the -h
+command line option to make the minifier parse and blacklist all the identifiers
+stb\_c\_lexer can find in desired header files.
