@@ -3,6 +3,7 @@
 #include <string.h>
 #include "stb_c_lexer.h"
 #include "str_hashmap.h"
+#include "config.h"
 
 #define BLACKLIST_FILENAME ".minify_blacklist"
 #define PRINTABLES "abcdefghijklmnopqrstuvwxyz"
@@ -109,6 +110,10 @@ struct str_hashmap load_blacklist(char **header_files) {
         }
         free(str);
     } // if read_file_to_str returns 0, should be nothing to free up manually
+
+    for (int i=0; i < sizeof(INTERNAL_BLACKLIST)/sizeof(char*); i++) {
+        str_hashmap_put(&map, INTERNAL_BLACKLIST[i], "");
+    }
 
     for (char **f = header_files; *f != NULL; f++) {
         len = read_file_to_str(&str, *f);
