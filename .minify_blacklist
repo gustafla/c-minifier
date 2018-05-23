@@ -3,10 +3,10 @@ PRINTABLES
 BLACKLIST_FILENAME
 
 # external/library
-str_hashmap
-str_hashmap_init
-str_hashmap_put
-str_hashmap_get
+#str_hashmap
+#str_hashmap_init
+#str_hashmap_put
+#str_hashmap_get
 stb_lexer
 stb_c_lexer_init
 stb_c_lexer_get_token
@@ -14,7 +14,7 @@ CLEX_id
 token
 string
 parse_point
-capacity
+#capacity
 
 # keywords
 return
@@ -67,3 +67,4 @@ strlen
 strtok
 memcpy
 memset
+exit

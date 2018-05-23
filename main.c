@@ -16,6 +16,9 @@ size_t read_file_to_str(char **dst, char const *filename) {
 
     fseek(file, 0, SEEK_END);
     size_t len = ftell(file);
+    if (!len) {
+        return 0; // Don't read and malloc an empty file
+    }
     *dst = (char*)malloc(len+1);
     fseek(file, 0, SEEK_SET);
 
@@ -30,24 +33,6 @@ size_t read_file_to_str(char **dst, char const *filename) {
         return 0;
     }
     return len;
-}
-
-struct str_hashmap load_blacklist() {
-    char *list;
-    size_t len = read_file_to_str(&list, BLACKLIST_FILENAME);
-    if (!len) {
-        return str_hashmap_init(0);
-    }
-
-    struct str_hashmap map = str_hashmap_init(128);
-
-    for (char *token = strtok(list, "\n"); token; token = strtok(NULL, "\n")) {
-        if (*token != '#' && *token != '\n') { // ignore comment or empty
-            str_hashmap_put(&map, token, "");
-        }
-    }
-
-    return map;
 }
 
 void gen_alias(char* id, size_t len) {
@@ -85,36 +70,96 @@ void gen_alias(char* id, size_t len) {
     }
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        return EXIT_FAILURE;
-    }
+void replace_id_with_alias(stb_lexer *lex, struct str_hashmap *blacklist_map) {
+    size_t len = strlen(lex->string);
+    gen_alias(lex->string, len);
+    strncpy(lex->parse_point-len, lex->string, len);
+}
 
-    struct str_hashmap blacklist_map = load_blacklist();
+void record_id_to_blacklist(stb_lexer *lex, struct str_hashmap *blacklist_map) {
+    str_hashmap_put(blacklist_map, lex->string, "");
+}
 
-    char *src, *new, *tmp;
-    size_t len = read_file_to_str(&src, argv[1]);
-    if (!len) {
-        return EXIT_FAILURE;
-    }
-    tmp = (char*)malloc(len); // stb_lexer scratch space
-
+void process(char *src, size_t len, struct str_hashmap *blacklist_map, void(*callback)(stb_lexer*, struct str_hashmap*)) {
     stb_lexer lex;
+    char *tmp = (char*)malloc(len); // stb_lexer scratch space
+
     stb_c_lexer_init(&lex, src, src+len, tmp, len);
     while (stb_c_lexer_get_token(&lex)) {
         if (lex.token == CLEX_id) {
-            int len = strlen(lex.string);
-            if (!str_hashmap_get(&blacklist_map, lex.string)) {
-                gen_alias(lex.string, len);
-                strncpy(lex.parse_point-len, lex.string, len);
+            if (!str_hashmap_get(blacklist_map, lex.string)) {
+                callback(&lex, blacklist_map);
             }
         }
     }
 
+    free(tmp);
+}
+
+struct str_hashmap load_blacklist(char **header_files) {
+    char *str;
+    size_t len = read_file_to_str(&str, BLACKLIST_FILENAME);
+    struct str_hashmap map = str_hashmap_init(128);
+
+    if (len) {
+        for (char *token = strtok(str, "\n"); token; token = strtok(NULL, "\n")) {
+            if (*token != '#' && *token != '\n') { // ignore comment or empty
+                str_hashmap_put(&map, token, "");
+            }
+        }
+        free(str);
+    } // if read_file_to_str returns 0, should be nothing to free up manually
+
+    for (char **f = header_files; *f != NULL; f++) {
+        len = read_file_to_str(&str, *f);
+        if (!len) {
+            exit(EXIT_FAILURE);
+        }
+        process(str, len, &map, record_id_to_blacklist);
+        free(str);
+    }
+
+    return map;
+}
+
+
+int main(int argc, char *argv[]) {
+    char *filename = NULL;
+    size_t header_files_size = sizeof(char*) * argc + 1;
+    char **header_files = (char**)malloc(header_files_size);
+    size_t header_files_n = 0;
+    memset(header_files, 0, header_files_size);
+
+    for (int i=1; i<argc; i++) {
+        if (strcmp(argv[i], "-h") == 0) {
+            if (i == argc - 1) {
+                fprintf(stderr, "-h expects a filename\n");
+                return EXIT_SUCCESS;
+            }
+            header_files[header_files_n++] = argv[++i];
+        } else {
+            filename = argv[i];
+        }
+    }
+
+    if (filename == NULL) {
+        fprintf(stderr, "please give an input file\n");
+        return EXIT_SUCCESS;
+    }
+
+    struct str_hashmap blacklist_map = load_blacklist(header_files);
+    free(header_files);
+
+    char *src;
+    size_t len = read_file_to_str(&src, filename);
+    if (!len) {
+        return EXIT_FAILURE;
+    }
+
+    process(src, len, &blacklist_map, replace_id_with_alias);
     printf("%s", src);
 
     free(src);
-    free(tmp);
 
     return EXIT_SUCCESS;
 }
