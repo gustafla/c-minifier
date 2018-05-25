@@ -16,6 +16,7 @@ static char *INTERNAL_BLACKLIST[] = {
     "while",
     "switch",
     "case",
+    "break",
     "do",
     "void",
     "long",
