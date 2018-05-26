@@ -8,6 +8,8 @@
 #define BLACKLIST_FILENAME ".minify_blacklist"
 #define PRINTABLES "abcdefghijklmnopqrstuvwxyz"
 
+struct str_hashmap g_ids_map; // will record all ids
+
 size_t read_file_to_str(char **dst, char const *filename) {
     FILE *file = fopen(filename, "rb");
     if (!file) {
@@ -43,24 +45,30 @@ void gen_alias(char* id, size_t len) {
         ids = str_hashmap_init(2048);
     }
 
+
     char *gen_id = str_hashmap_get(&ids, id); // check if id is known
     size_t gen_len; // len of string to be written to param "id"
     if (gen_id) {
         gen_len = strlen(gen_id);
         strcpy(id, gen_id); // if id known, we can just write it out
-    } else { // else generate a new alias
+    } else if (len < current/(sizeof(PRINTABLES)-1)+1) {
+        return;
+    } else {
         char gen_id[32]; // TODO make this safer
-        /* Thank mr stackoverflow for helping a brainlet out */
-        gen_len = 0; // start from most significant
-        unsigned long n = current; // our number
         do {
-            // insert the character this digit represents
-            gen_id[gen_len++] = PRINTABLES[n % (sizeof(PRINTABLES)-1)];
-            // move "magnitude" of n down to the next less significant digit
-        } while ((unsigned long)(n /= (sizeof(PRINTABLES)-1)) > 0);
-        // next number for next call
-        current++;
-        gen_id[gen_len] = '\0'; // add null char for str_hashmap_put
+            gen_len = 0; // start from most significant
+            unsigned long n = current; // our number
+            /* Thank mr stackoverflow for helping a brainlet out */
+            do {
+                // insert the character this digit represents
+                gen_id[gen_len++] = PRINTABLES[n % (sizeof(PRINTABLES)-1)];
+                // move "magnitude" of n down to the next less significant digit
+            } while ((unsigned long)(n /= (sizeof(PRINTABLES)-1)) > 0);
+            // next number for next call
+            current++;
+            gen_id[gen_len] = '\0';
+            // try again if id is potentially reserved
+        } while (str_hashmap_get(&g_ids_map, gen_id));
         str_hashmap_put(&ids, id, gen_id); // save result of this id
         strncpy(id, gen_id, gen_len); // write out
     }
@@ -152,15 +160,22 @@ int main(int argc, char *argv[]) {
         return EXIT_SUCCESS;
     }
 
+    // Load blacklist
     struct str_hashmap blacklist_map = load_blacklist(header_files);
     free(header_files);
 
+    // Read source file
     char *src;
     size_t len = read_file_to_str(&src, filename);
     if (!len) {
         return EXIT_FAILURE;
     }
 
+    // Pre-pass store all ids (globally, TODO refactor)
+    g_ids_map = str_hashmap_init(2048);
+    process(src, len, &g_ids_map, record_id_to_blacklist);
+
+    // Actually replace all ids
     process(src, len, &blacklist_map, replace_id_with_alias);
     printf("%s", src);
 
