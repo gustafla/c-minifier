@@ -58,7 +58,7 @@ void gen_alias(char* id, size_t len) {
         do {
             gen_len = 0; // start from most significant
             unsigned long n = current; // our number
-            /* Thank mr stackoverflow for helping a brainlet out */
+            // Thank mr stackoverflow for helping a brainlet out
             do {
                 // insert the character this digit represents
                 gen_id[gen_len++] = PRINTABLES[n % (sizeof(PRINTABLES)-1)];
