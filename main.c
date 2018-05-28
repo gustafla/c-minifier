@@ -45,30 +45,33 @@ void gen_alias(char* id, size_t len) {
         ids = str_hashmap_init(2048);
     }
 
-
     char *gen_id = str_hashmap_get(&ids, id); // check if id is known
     size_t gen_len; // len of string to be written to param "id"
     if (gen_id) {
         gen_len = strlen(gen_id);
         strcpy(id, gen_id); // if id known, we can just write it out
-    } else if (len < current/(sizeof(PRINTABLES)-1)+1) {
-        return;
     } else {
         char gen_id[32]; // TODO make this safer
         do {
             gen_len = 0; // start from most significant
-            unsigned long n = current; // our number
+            long n = current; // our number
             // Thank mr stackoverflow for helping a brainlet out
             do {
                 // insert the character this digit represents
                 gen_id[gen_len++] = PRINTABLES[n % (sizeof(PRINTABLES)-1)];
                 // move "magnitude" of n down to the next less significant digit
-            } while ((unsigned long)(n /= (sizeof(PRINTABLES)-1)) > 0);
+            } while ((long)(n = n / (sizeof(PRINTABLES)-1) - 1) >= 0);
+
+            if (len <= gen_len) {
+                return; // don't give alias if no benefit
+            }
+
             // next number for next call
             current++;
             gen_id[gen_len] = '\0';
             // try again if id is potentially reserved
         } while (str_hashmap_get(&g_ids_map, gen_id));
+
         str_hashmap_put(&ids, id, gen_id); // save result of this id
         strncpy(id, gen_id, gen_len); // write out
     }
@@ -177,7 +180,7 @@ int main(int argc, char *argv[]) {
 
     // Actually replace all ids
     process(src, len, &blacklist_map, replace_id_with_alias);
-    printf("%s", src);
+    puts(src);
 
     free(src);
 

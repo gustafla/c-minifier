@@ -18,7 +18,9 @@ static char *INTERNAL_BLACKLIST[] = {
     "while",
     "switch",
     "case",
+    "default",
     "break",
+    "continue",
     "do",
     "void",
     "long",
@@ -36,6 +38,9 @@ static char *INTERNAL_BLACKLIST[] = {
     "int32_t",
     "int64_t",
     "bool",
+    "true",
+    "false",
+    "restrict",
     "FILE",
     "fopen",
     "fread",
@@ -60,7 +65,10 @@ static char *INTERNAL_BLACKLIST[] = {
     "strtok",
     "memcpy",
     "memset",
-    "exit"
+    "exit",
+    "fabsf",
+    "powf",
+    "sinf"
 };
 
 #endif // CONFIG_H
