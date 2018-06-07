@@ -94,9 +94,9 @@ void record_id_to_blacklist(stb_lexer *lex, struct str_hashmap *blacklist_map) {
 
 void process(char *src, size_t len, struct str_hashmap *blacklist_map, void(*callback)(stb_lexer*, struct str_hashmap*)) {
     stb_lexer lex;
-    char *tmp = (char*)malloc(len); // stb_lexer scratch space
+    char *tmp = (char*)malloc(len*2); // stb_lexer scratch space
 
-    stb_c_lexer_init(&lex, src, src+len, tmp, len);
+    stb_c_lexer_init(&lex, src, src+len, tmp, len*2);
     while (stb_c_lexer_get_token(&lex)) {
         if (lex.token == CLEX_id) {
             if (!str_hashmap_get(blacklist_map, lex.string)) {

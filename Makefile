@@ -1,8 +1,8 @@
 TARGET=minify
-CC?=gcc
+CC=gcc
 CFLAGS+=-Os -g -DSTB_C_LEXER_IMPLEMENTATION
 SOURCES=main.c str_hashmap.c
-OBJS=$(patsubst %.c, %.o, $(SOURCES))
+OBJS=$(patsubst %.c,%.o,$(SOURCES))
 
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
@@ -13,5 +13,4 @@ $(TARGET): $(OBJS)
 .PHONY: clean
 
 clean:
-	rm -f $(TARGET)
-	find . -name "*.o" -delete
+	rm -f $(TARGET) $(OBJS)
