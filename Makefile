@@ -10,7 +10,13 @@ $(TARGET): $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<
 
-.PHONY: clean
+.PHONY: clean install
+
+PREFIX=~/.local
+
+install: $(TARGET)
+	install -d $(PREFIX)/bin/
+	cp $(TARGET) $(PREFIX)/bin/
 
 clean:
 	rm -f $(TARGET) $(OBJS)
